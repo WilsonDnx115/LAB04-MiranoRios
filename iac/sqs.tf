@@ -1,6 +1,6 @@
 # cola principal de imagenes
 resource "aws_sqs_queue" "image_queue" {
-  name                      = "image-processor-${terraform.workspace}-image-queu"
+  name                      = "image-processor-${terraform.workspace}-image-queue"
   visibility_timeout_seconds = 360
   message_retention_seconds = 86400
   receive_wait_time_seconds = 20
