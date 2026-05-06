@@ -89,14 +89,11 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   depends_on = [aws_sqs_queue_policy.image_queue_policy]
 }
 
-# Subir imagen inicial de prueba
+# Subir imagen inicial
 resource "aws_s3_object" "initial_image" {
   bucket       = aws_s3_bucket.images.id
   key          = "uploads/image.jpeg"
   source       = "${path.module}/../src/images/image.jpeg"
   content_type = "image/jpeg"
-
-  # Asegurarnos de que se suba DESPUÉS de configurar las notificaciones
-  # para que dispare el pipeline correctamente.
   depends_on   = [aws_s3_bucket_notification.bucket_notification]
 }
