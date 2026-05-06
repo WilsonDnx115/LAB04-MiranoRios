@@ -30,15 +30,16 @@ resource "aws_lambda_function" "crop_lambda" {
 # Path del codigo
 data "archive_file" "crop_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../../src/lambdas/crop"
+  source_dir  = "${path.module}/../src/lambdas/crop"
   output_path = "${path.module}/crop_function.zip"
 }
 
 # Trigger de sqs
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
-  event_source_arn = aws_sqs_queue.image_queue.arn
-  function_name    = aws_lambda_function.crop_lambda.arn
-  batch_size       = 5
+  event_source_arn        = aws_sqs_queue.image_queue.arn
+  function_name           = aws_lambda_function.crop_lambda.arn
+  batch_size              = 5
+  function_response_types = ["ReportBatchItemFailures"]
 }
 
 # Logs de la lambda
