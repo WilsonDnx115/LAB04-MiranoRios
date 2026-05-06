@@ -56,19 +56,34 @@ export const handler = async (event) => {
         }
 
         if (!fileBuffer || fileBuffer.length === 0) {
-            throw new Error("El cuerpo de la imagen está vacío");
+            return { statusCode: 400, body: JSON.stringify({ error: "El cuerpo de la imagen está vacío" }) };
         }
+
+        const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+        if (fileBuffer.length > MAX_SIZE) {
+            return { statusCode: 400, body: JSON.stringify({ error: "La imagen excede el límite de 10MB" }) };
+        }
+
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+        if (!allowedMimeTypes.includes(fileMimeType)) {
+            return { statusCode: 400, body: JSON.stringify({ error: "Formato no válido. Solo se permite jpg, png, gif y webp" }) };
+        }
+
+        const extMap = { 'image/jpeg': 'jpeg', 'image/jpg': 'jpeg', 'image/gif': 'gif', 'image/webp': 'webp' };
+        const extension = extMap[fileMimeType] ?? 'png';
+        const finalFileName = `${fileName.split('.')[0]}.${extension}`;
+
         // sube a s3
         await s3.send(new PutObjectCommand({
             Bucket: bucket,
-            Key: `${prefix}${fileName}`,
+            Key: `${prefix}${finalFileName}`,
             Body: fileBuffer,
             ContentType: fileMimeType
         }));
 
         return {
             statusCode: 201,
-            body: JSON.stringify({ message: "Imagen recibida", file: fileName })
+            body: JSON.stringify({ message: "Imagen recibida", file: finalFileName })
         };
     } catch (err) {
         console.error("ERROR CRITICO:", err.message);
