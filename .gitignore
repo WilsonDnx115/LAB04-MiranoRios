@@ -1,0 +1,19 @@
+# Se ignora la carpeta de inicialización (binarios y plugins)
+**/.terraform/
+
+# Ignorar archivos de estado que pueden contener datos sensibles
+*.tfstate
+*.tfstate.*
+terraform.tfstate.d/
+
+# Ignorar variables locales
+*.tfvars
+
+# Ignorar dependencias locales
+**/node_modules/
+
+# Ignorar archivos comprimidos generados para las Lambdas
+**/crop_function.zip
+**/upload_function.zip
+
+
