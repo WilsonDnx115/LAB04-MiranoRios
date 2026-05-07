@@ -5,10 +5,10 @@ resource "aws_security_group" "lambda_sg_upload" {
   vpc_id      = aws_vpc.main.id
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    prefix_list_ids = [aws_vpc_endpoint.s3.prefix_list_id]
   }
 }
 
@@ -18,10 +18,10 @@ resource "aws_security_group" "lambda_sg_crop" {
   vpc_id      = aws_vpc.main.id
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    prefix_list_ids = [aws_vpc_endpoint.s3.prefix_list_id]
   }
 }
 
@@ -49,4 +49,23 @@ resource "aws_security_group" "sqs_endpoint_sg" {
   }
 
   tags = { Name = "${var.project_name}-${terraform.workspace}-sqs-vpce-sg" }
+}
+
+# Reglas de salida
+resource "aws_security_group_rule" "upload_to_sqs" {
+  type                     = "egress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.lambda_sg_upload.id
+  source_security_group_id = aws_security_group.sqs_endpoint_sg.id
+}
+
+resource "aws_security_group_rule" "crop_to_sqs" {
+  type                     = "egress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.lambda_sg_crop.id
+  source_security_group_id = aws_security_group.sqs_endpoint_sg.id
 }
